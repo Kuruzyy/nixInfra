@@ -32,9 +32,6 @@
       dependsOn = [ "nextcloud-db" "nextcloud-redis" ];
       volumes = [
         "${vars.container.directory}/nextcloud/data:/var/www/html"
-        "${vars.container.directory}/paperless-ngx/data:/paperless"
-        "${vars.container.directory}/immich/photos:/immich"
-        "${vars.container.directory}/n8n/files:/n8n"
       ];
       environment = {
         POSTGRES_HOST = "nextcloud-db";
