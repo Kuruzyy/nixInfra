@@ -29,9 +29,13 @@ in
     # ./containers/jackett.nix
     # ./containers/flaresolverr.nix
   ];
+  # System deeclaration
+  system.stateVersion = "24.11";
+  networking.hostName = "homelab-server";
+
 
   # Add comfort packages & services
-  environment.systemPackages = with pkgs; [ btop git ];
+  environment.systemPackages = with pkgs; [ btop ];
   services.caddy.enable = true;
 
   # Kernel and system config
