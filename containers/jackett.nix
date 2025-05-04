@@ -17,12 +17,12 @@
       "${vars.container.directory}/downloads:/downloads"
     ];
     environment = [
-      PUID=${vars.general.PUID}
-      PGID=${vars.general.PGID}
-      TZ=${vars.general.TZ}
+      PUID = ${vars.general.PUID};
+      PGID = ${vars.general.PGID};
+      TZ = ${vars.general.TZ};
     ]
     ports = [
-        "127.0.0.1:9117:9117"
+      "127.0.0.1:9117:9117"
     ];
   };
 }
