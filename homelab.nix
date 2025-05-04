@@ -28,14 +28,18 @@ in
     # ./containers/jdownloader.nix
     # ./containers/jackett.nix
     # ./containers/flaresolverr.nix
+    # ./containers/myspeed.nix
+    # ./containers/omnitools.nix
+    # ./containers/ittools.nix
+    # ./containers/stirlingpdf.nix
+    # ./containers/convertx.nix
   ];
   # System declaration
   system.stateVersion = "24.11";
   networking.hostName = "homelab-server";
 
-
   # Add comfort packages & services
-  environment.systemPackages = with pkgs; [ btop ];
+  environment.systemPackages = with pkgs; [ btop git ];
   services.caddy.enable = true;
 
   # Kernel and system config

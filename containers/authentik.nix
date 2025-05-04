@@ -1,18 +1,32 @@
 { config, pkgs, vars, ... }:
 let
+  domainName = vars.general.domainName;
+  networkInterface = vars.general.networkInterface;
+  portBinding = external: internal:
+    if domainName != null then
+      "127.0.0.1:${toString external}:${toString internal}"
+    else
+      "${toString external}:${toString internal}";
+
   secret_key = "";
 in
 {
-  services.caddy.virtualHosts."authentik.${vars.general.domainName}" = {
-    useACMEHost = vars.general.domainName;
-    extraConfig = ''
-      reverse_proxy http://127.0.0.1:9000
-    '';
+  services.caddy.virtualHosts = lib.mkIf (domainName != null) {
+    "authentik.${domainName}" = {
+      useACMEHost = vars.general.domainName;
+      extraConfig = ''
+        reverse_proxy http://127.0.0.1:9000
+      '';
+    };
   };
+
+  networking.firewall.interfaces.${networkInterface}.allowedTCPPorts = 
+    (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
+    ++ (lib.optional (domainName == null) 9000);
 
   virtualisation.oci-containers.containers = {
     authentik-db = {
-      image = vars.container.db.postgres;
+      image = "docker.io/library/postgres:16-alpine";
       hostname = "authentik-db";
       autoStart = true;
       volumes = [ "${vars.container.directory}/authentik/db:/var/lib/postgresql/data" ];
@@ -23,7 +37,7 @@ in
       };
     };
     authentik-redis = {
-      image = vars.container.db.redis;
+      image = "docker.io/library/redis:alpine";
       hostname = "authentik-redis";
       autoStart = true;
     };
@@ -66,12 +80,11 @@ in
         AUTHENTIK_POSTGRESQL__PASSWORD = "authentik";
       };
       ports = [
-        "127.0.0.1:9000:9000"
-        "127.0.0.1:9443:9443"
+        (portBinding 9000 9000)
       ];
       cmd = [
         "server"
       ];
     };
-  } 
+  };
 }

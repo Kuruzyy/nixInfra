@@ -1,15 +1,31 @@
-{ config, pkgs, vars, ... }:
-
+{ config, pkgs, vars, lib, ... }:
+let
+  domainName = vars.general.domainName;
+  networkInterface = vars.general.networkInterface;
+  portBinding = external: internal:
+    if domainName != null then
+      "127.0.0.1:${toString external}:${toString internal}"
+    else
+      "${toString external}:${toString internal}";
+in
 {
-  # Firewall
-  networking.firewall.interfaces.${vars.general.networkInterface}.allowedTCPPorts = [ 53 853 ];
-  networking.firewall.interfaces.${vars.general.networkInterface}.allowedUDPPorts = [ 53 853 ];
+  services.caddy.virtualHosts = lib.mkIf (domainName != null) {
+    "technitium.${domainName}" = {
+      useACMEHost = domainName;
+      extraConfig = ''
+        reverse_proxy http://127.0.0.1:5380
+      '';
+    };
+  };
 
-  services.caddy.virtualHosts."technitium.${vars.general.domainName}" = {
-    useACMEHost = vars.general.domainName;
-    extraConfig = ''
-      reverse_proxy http://127.0.0.1:5380
-    '';
+  networking.firewall.interfaces.${networkInterface} = {
+    allowedTCPPorts = 
+      (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or [])
+      ++ [ 53 853 ]
+      ++ (lib.optional (domainName == null) 5380);
+    allowedUDPPorts = 
+      (config.networking.firewall.interfaces.${networkInterface}.allowedUDPPorts or [])
+      ++ [ 53 853 ];
   };
 
   virtualisation.oci-containers.containers.technitium = {
@@ -27,7 +43,7 @@
       "53:53/udp"
       "853:853/udp"
       "853:853/tcp"
-      "127.0.0.1:5380:5380"
+      (portBinding 5380 5380)
     ];
     capabilities = {
       NET_BIND_SERVICE = true;

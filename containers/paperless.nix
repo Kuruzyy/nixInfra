@@ -1,7 +1,14 @@
 { config, pkgs, vars, ... }:
-
 let
-  use_sso = true;
+  domainName = vars.general.domainName;
+  networkInterface = vars.general.networkInterface;
+  portBinding = external: internal:
+    if domainName != null then
+      "127.0.0.1:${toString external}:${toString internal}"
+    else
+      "${toString external}:${toString internal}";
+
+  use_sso = false;
   ssoEnvironment = if use_sso then
     let
       oauth_domain = "paperless";
@@ -29,16 +36,22 @@ let
   else {};
 in
 {
-  services.caddy.virtualHosts."paperless.${vars.general.domainName}" = {
-    useACMEHost = vars.general.domainName;
-    extraConfig = ''
-      reverse_proxy http://127.0.0.1:8010
-    '';
+  services.caddy.virtualHosts = lib.mkIf (domainName != null) {
+    "paperless.${domainName}" = {
+      useACMEHost = domainName;
+      extraConfig = ''
+        reverse_proxy http://127.0.0.1:8010
+      '';
+    };
   };
+
+  networking.firewall.interfaces.${networkInterface}.allowedTCPPorts = 
+    (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
+    ++ (lib.optional (domainName == null) 8010);
 
   virtualisation.oci-containers.containers = {
     paperless-db = {
-      image = vars.container.db.postgres;
+      image = "docker.io/library/postgres:17";
       hostname = "paperless-db";
       autoStart = true;
       volumes = [ "${vars.container.directory}/paperless/db:/var/lib/postgresql/data" ];
@@ -49,7 +62,7 @@ in
       };
     };
     paperless-redis = {
-      image = vars.container.db.redis;
+      image = "docker.io/library/redis:alpine";
       hostname = "paperless-redis";
       autoStart = true;
     };
@@ -63,11 +76,11 @@ in
         {
           PAPERLESS_DBHOST = "paperless-db";
           PAPERLESS_REDIS = "redis://paperless-redis:6379";
-          PAPERLESS_URL = "paperless.${vars.general.domainName}";
+          PAPERLESS_URL = "paperless.${domainName}";
         }
         // ssoEnvironment;
       ports = [
-        "127.0.0.1:8010:8000"
+        (portBinding 8010 8000)
       ]
     };
   };

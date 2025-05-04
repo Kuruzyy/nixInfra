@@ -1,16 +1,30 @@
 { config, pkgs, vars, ... }:
-
+let
+  domainName = vars.general.domainName;
+  networkInterface = vars.general.networkInterface;
+  portBinding = external: internal:
+    if domainName != null then
+      "127.0.0.1:${toString external}:${toString internal}"
+    else
+      "${toString external}:${toString internal}";
+in
 {
-  services.caddy.virtualHosts."kestra.${vars.general.domainName}" = {
-    useACMEHost = vars.general.domainName;
-    extraConfig = ''
-      reverse_proxy http://127.0.0.1:9090
-    '';
+  services.caddy.virtualHosts = lib.mkIf (domainName != null) {
+    "kestra.${domainName}" = {
+      useACMEHost = vars.general.domainName;
+      extraConfig = ''
+        reverse_proxy http://127.0.0.1:9090
+      '';
+    };
   };
+
+  networking.firewall.interfaces.${networkInterface}.allowedTCPPorts = 
+    (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
+    ++ (lib.optional (domainName == null) 9090);
 
   virtualisation.oci-containers.containers = {
     kestra-db = {
-      image = vars.container.db.postgres;
+      image = "postgres:alpine";
       hostname = "kestra-db";
       autoStart = true;
       volumes = [ "${vars.container.directory}/kestra/db:/var/lib/postgresql/data" ];
@@ -58,7 +72,7 @@
           '';
       };
       ports = [
-        "127.0.0.1:9090:8080"
+        (portBinding 9090 8080)
       ];
     };
   } 

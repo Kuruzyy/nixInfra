@@ -1,4 +1,4 @@
-{ config, pkgs, vars, ... }:
+{ config, pkgs, vars, lib, ... }:
 let
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
@@ -10,33 +10,35 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "jackett.${domainName}" = {
-      useACMEHost = vars.general.domainName;
+    "qbittorrent.${domainName}" = {
+      useACMEHost = domainName;
       extraConfig = ''
-        reverse_proxy http://127.0.0.1:9117
+        reverse_proxy http://127.0.0.1:9001
       '';
     };
   };
 
   networking.firewall.interfaces.${networkInterface}.allowedTCPPorts = 
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
-    ++ (lib.optional (domainName == null) 9117);
+    ++ (lib.optional (domainName == null) 9001);
 
-  virtualisation.oci-containers.containers.jackett = {
-    image = "lscr.io/linuxserver/jackett:latest";
-    hostname = "jackett";
+  virtualisation.oci-containers.containers.qbittorrent = {
+    image = "lscr.io/linuxserver/qbittorrent:latest";
+    hostname = "qbittorrent";
     autoStart = true;
     volumes = [
-      "${vars.container.directory}/jackett:/config"
+      "${vars.container.directory}/qbittorrent:/config"
       "${vars.container.directory}/downloads:/downloads"
     ];
     environment = {
       PUID = vars.general.PUID;
       PGID = vars.general.PGID;
       TZ = vars.general.TZ;
+      WEBUI_PORT = 8080;
+      TORRENTING_PORT = 6881;
     };
     ports = [
-      (portBinding 9117 9117)
+      (portBinding 9001 8080)
     ];
   };
 }

@@ -10,33 +10,24 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "jackett.${domainName}" = {
-      useACMEHost = vars.general.domainName;
+    "it-tools.${domainName}" = {
+      useACMEHost = domainName;
       extraConfig = ''
-        reverse_proxy http://127.0.0.1:9117
+        reverse_proxy http://127.0.0.1:8117
       '';
     };
   };
 
   networking.firewall.interfaces.${networkInterface}.allowedTCPPorts = 
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
-    ++ (lib.optional (domainName == null) 9117);
+    ++ (lib.optional (domainName == null) 8117);
 
-  virtualisation.oci-containers.containers.jackett = {
-    image = "lscr.io/linuxserver/jackett:latest";
-    hostname = "jackett";
+  virtualisation.oci-containers.containers.it-tools = {
+    image = "corentinth/it-tools:latest";
+    hostname = "it-tools";
     autoStart = true;
-    volumes = [
-      "${vars.container.directory}/jackett:/config"
-      "${vars.container.directory}/downloads:/downloads"
-    ];
-    environment = {
-      PUID = vars.general.PUID;
-      PGID = vars.general.PGID;
-      TZ = vars.general.TZ;
-    };
     ports = [
-      (portBinding 9117 9117)
+      (portBinding 8117 80)
     ];
   };
 }

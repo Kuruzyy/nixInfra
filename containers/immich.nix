@@ -1,12 +1,26 @@
 { config, pkgs, vars, ... }:
-
+let
+  domainName = vars.general.domainName;
+  networkInterface = vars.general.networkInterface;
+  portBinding = external: internal:
+    if domainName != null then
+      "127.0.0.1:${toString external}:${toString internal}"
+    else
+      "${toString external}:${toString internal}";
+in
 {
-  services.caddy.virtualHosts."immich.${vars.general.domainName}" = {
-    useACMEHost = vars.general.domainName;
-    extraConfig = ''
-      reverse_proxy http://127.0.0.1:8080
-    '';
+  services.caddy.virtualHosts = lib.mkIf (domainName != null) {
+    "immich.${domainName}" = {
+      useACMEHost = vars.general.domainName;
+      extraConfig = ''
+        reverse_proxy http://127.0.0.1:8080
+      '';
+    };
   };
+
+  networking.firewall.interfaces.${networkInterface}.allowedTCPPorts = 
+    (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
+    ++ (lib.optional (domainName == null) 8080);
 
   virtualisation.oci-containers.containers = {
     immich-db = {
@@ -21,7 +35,7 @@
       };
     };
     immich-redis = {
-      image = vars.container.db.redis;
+      image = "docker.io/library/redis:alpine";
       hostname = "immich-redis";
       autoStart = true;
     };
@@ -40,7 +54,7 @@
         IMMICH_TRUSTED_PROXIES = "https://immich.${vars.general.domainName}";
       };
       ports = [
-        "127.0.0.1:8080:8080"
+        (portBinding 8080 8080)
       ];
     };
   }
