@@ -17,11 +17,11 @@
       "${vars.container.directory}/downloads:/downloads"
     ];
     environment = [
-      PUID=${vars.general.PUID}
-      PGID=${vars.general.PGID}
-      TZ=${vars.general.TZ}
-      WEBUI_PORT=8080
-      TORRENTING_PORT=6881
+      PUID = ${vars.general.PUID};
+      PGID = ${vars.general.PGID};
+      TZ = ${vars.general.TZ};
+      WEBUI_PORT = 8080;
+      TORRENTING_PORT = 6881;
     ]
     ports = [
         "127.0.0.1:9991:8080"
