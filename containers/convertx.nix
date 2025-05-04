@@ -13,14 +13,14 @@ in
     "convertx.${domainName}" = {
       useACMEHost = domainName;
       extraConfig = ''
-        reverse_proxy http://127.0.0.1:8117
+        reverse_proxy http://127.0.0.1:8119
       '';
     };
   };
 
   networking.firewall.interfaces.${networkInterface}.allowedTCPPorts = 
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
-    ++ (lib.optional (domainName == null) 8117);
+    ++ (lib.optional (domainName == null) 8119);
 
   virtualisation.oci-containers.containers.convertx = {
     image = "ghcr.io/c4illin/convertx";
