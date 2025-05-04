@@ -31,7 +31,7 @@ in
   ];
 
   # Add comfort packages & services
-  environment.systemPackages = with pkgs; [ btop ];
+  environment.systemPackages = with pkgs; [ btop git ];
   services.caddy.enable = true;
 
   # Kernel and system config
