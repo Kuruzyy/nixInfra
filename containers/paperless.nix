@@ -4,7 +4,7 @@ let
   use_sso = true;
   ssoEnvironment = if use_sso then
     let
-      oauth_domain = "paperless-ngx";
+      oauth_domain = "paperless";
       client_id = "1234";
       client_secret = "4321";
     in {
@@ -58,7 +58,7 @@ in
       hostname = "paperless";
       autoStart = true;
       dependsOn = [ "paperless-db" "paperless-redis" ];
-      volumes = [ "${vars.container.directory}/paperless-ngx/data:/usr/src/paperless" ];
+      volumes = [ "${vars.container.directory}/paperless/data:/usr/src/paperless" ];
       environment = 
         {
           PAPERLESS_DBHOST = "paperless-db";
