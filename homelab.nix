@@ -29,7 +29,7 @@ in
     # ./containers/jackett.nix
     # ./containers/flaresolverr.nix
   ];
-  # System deeclaration
+  # System declaration
   system.stateVersion = "24.11";
   networking.hostName = "homelab-server";
 
