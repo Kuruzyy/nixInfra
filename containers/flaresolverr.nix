@@ -13,10 +13,10 @@
     hostname = "flaresolverr";
     autoStart = true;
     environment = [
-      LOG_LEVEL=info
-      LOG_HTML=false
-      CAPTCHA_SOLVER=none
-      TZ=${vars.general.TZ}
+      LOG_LEVEL = "info";
+      LOG_HTML = false;
+      CAPTCHA_SOLVER = "none";
+      TZ = ${vars.general.TZ};
     ]
     ports = [
         "127.0.0.1:8191:8191"
