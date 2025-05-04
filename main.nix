@@ -1,8 +1,8 @@
 { config, pkgs, lib, ... }:
 
 let
-  varsModule   = import ./vars.nix   { inherit config pkgs; };
-  storageModule= import ./storage.nix{ inherit config pkgs; };
+  varsModule = import ./vars.nix   { inherit config pkgs; };
+  storageModule = import ./storage.nix{ inherit config pkgs; };
 
   # Grab all the container names that you’ve actually enabled
   containerNames = lib.attrNames config.virtualisation.oci-containers.containers;
