@@ -1,8 +1,18 @@
 { config, pkgs, lib, ... }:
 
 let
-  varsModule = import ./vars.nix { inherit config pkgs; };
-  storageModule = import ./storage.nix { inherit config pkgs; };
+  varsModule   = import ./vars.nix   { inherit config pkgs; };
+  storageModule= import ./storage.nix{ inherit config pkgs; };
+
+  # Grab all the container names that you’ve actually enabled
+  containerNames = lib.attrNames config.virtualisation.oci-containers.containers;
+
+  # Build one tmpfiles rule per container
+  tmpRules = lib.map
+    (name:
+      ''d ${varsModule.vars.container.directory}/${name} 0755 ${varsModule.vars.general.PUID} ${varsModule.vars.general.PGID} - -''
+    )
+    containerNames;
 in
 {
   imports = [
@@ -14,6 +24,10 @@ in
     # ./containers/nextcloud.nix
     # ./containers/immich.nix
     # ./containers/paperless.nix
+    # ./containers/qbittorent.nix
+    # ./containers/jdownloader.nix
+    # ./containers/jackett.nix
+    # ./containers/flaresolverr.nix
   ];
 
   # Add comfort packages & services
@@ -47,14 +61,6 @@ in
     networkSocket.openFirewall = true;
   };
 
-  # Ensure config folders exist
-  systemd.tmpfiles.rules = [
-    "d ${varsModule.vars.container.directory}/technitium 0755 ${varsModule.vars.general.PUID} ${varsModule.vars.general.PGID} - -"
-    "d ${varsModule.vars.container.directory}/authentik 0755 ${varsModule.vars.general.PUID} ${varsModule.vars.general.PGID} - -"
-    # "d ${varsModule.vars.container.directory}/n8n 0755 ${varsModule.vars.general.PUID} ${varsModule.vars.general.PGID} - -"
-    # "d ${varsModule.vars.container.directory}/kestra 0755 ${varsModule.vars.general.PUID} ${varsModule.vars.general.PGID} - -"
-    # "d ${varsModule.vars.container.directory}/nextcloud 0755 ${varsModule.vars.general.PUID} ${varsModule.vars.general.PGID} - -"
-    # "d ${varsModule.vars.container.directory}/immich 0755 ${varsModule.vars.general.PUID} ${varsModule.vars.general.PGID} - -"
-    # "d ${varsModule.vars.container.directory}/paperless-ngx 0755 ${varsModule.vars.general.PUID} ${varsModule.vars.general.PGID} - -"
-  ];
+  # Dynamically generate tmpfiles.rules from whichever containers you imported
+  systemd.tmpfiles.rules = tmpRules;
 }
