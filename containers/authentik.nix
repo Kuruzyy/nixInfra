@@ -53,7 +53,7 @@ in
         "${vars.container.directory}/${name}/certs:/certs"
       ];
       environment = {
-        AUTHENTIK_SECRET_KEY = ${secret_key};
+        AUTHENTIK_SECRET_KEY = secret_key;
         AUTHENTIK_REDIS__HOST = "authentik-redis";
         AUTHENTIK_POSTGRESQL__HOST = "authentik-db";
         AUTHENTIK_POSTGRESQL__USER = "authentik";
@@ -74,7 +74,7 @@ in
         "${vars.container.directory}/${name}/template:/templates"
       ];
       environment = {
-        AUTHENTIK_SECRET_KEY = ${secret_key};
+        AUTHENTIK_SECRET_KEY = secret_key;
         AUTHENTIK_REDIS__HOST = "authentik-redis";
         AUTHENTIK_POSTGRESQL__HOST = "authentik-db";
         AUTHENTIK_POSTGRESQL__USER = "authentik";
