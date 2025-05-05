@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "jackett";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "jackett.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = vars.general.domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:9117
@@ -27,7 +29,7 @@ in
     hostname = "jackett";
     autoStart = true;
     volumes = [
-      "${vars.container.directory}/jackett:/config"
+      "${vars.container.directory}/${name}:/config"
       "${vars.container.directory}/downloads:/downloads"
     ];
     environment = {
