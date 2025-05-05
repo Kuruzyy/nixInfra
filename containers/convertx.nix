@@ -26,7 +26,7 @@ in
 
   virtualisation.oci-containers.containers.${name} = {
     image = "ghcr.io/c4illin/convertx";
-    hostname = "convertx";
+    hostname = name;
     autoStart = true;
     volumes = [
       "${vars.container.directory}/${name}:/app/data"
