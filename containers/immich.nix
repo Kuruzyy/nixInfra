@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "immich";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "immich.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = vars.general.domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:8080
@@ -27,7 +29,7 @@ in
       image = "tensorchord/pgvecto-rs:pg15-v0.4.0-rootless";
       hostname = "immich-db";
       autoStart = true;
-      volumes = [ "${vars.container.directory}/immich/db:/var/lib/postgresql/data" ];
+      volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
         POSTGRES_DB = "immich";
         POSTGRES_USER = "immich";
@@ -41,12 +43,12 @@ in
     };
     immich = {
       image = "ghcr.io/imagegenius/immich:noml";
-      hostname = "immich";
+      hostname = name;
       autoStart = true;
       dependsOn = [ "immich-db" "immich-redis" ];
       volumes = [
-        "${vars.container.directory}/immich/data:/config"
-        "${vars.container.directory}/immich/photos:/photos"
+        "${vars.container.directory}/${name}/data:/config"
+        "${vars.container.directory}/${name}/photos:/photos"
       ];
       environment = {
         DB_URL = "postgresql://immich:immich@immich-db:5432/immich";
