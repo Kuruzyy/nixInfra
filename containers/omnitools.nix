@@ -24,7 +24,7 @@ in
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
     ++ (lib.optional (domainName == null) 8116);
 
-  virtualisation.oci-containers.containers.omni-tools = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "iib0011/omni-tools:latest";
     hostname = "omni-tools";
     autoStart = true;
