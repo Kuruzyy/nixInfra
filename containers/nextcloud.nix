@@ -1,5 +1,7 @@
 { config, pkgs, vars, lib, ... }:
 let
+  name = "nextcloud";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "nextcloud.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:8001
@@ -27,7 +29,7 @@ in
       image = "postgres:alpine";
       hostname = "nextcloud-db";
       autoStart = true;
-      volumes = [ "${vars.container.directory}/nextcloud/db:/var/lib/postgresql/data" ];
+      volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
         POSTGRES_DB = "nextcloud";
         POSTGRES_USER = "nextcloud";
@@ -45,7 +47,7 @@ in
       autoStart = true;
       dependsOn = [ "nextcloud-db" "nextcloud-redis" ];
       volumes = [
-        "${vars.container.directory}/nextcloud/data:/var/www/html"
+        "${vars.container.directory}/${name}/data:/var/www/html"
       ];
       environment = {
         POSTGRES_HOST = "nextcloud-db";
