@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "flaresolverr";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "flaresolverr.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = vars.general.domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:8191
@@ -22,9 +24,9 @@ in
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
     ++ (lib.optional (domainName == null) 8191);
 
-  virtualisation.oci-containers.containers.flaresolverr = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "ghcr.io/flaresolverr/flaresolverr:latest";
-    hostname = "flaresolverr";
+    hostname = name;
     autoStart = true;
     environment = {
       LOG_LEVEL = "info";
