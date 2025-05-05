@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "jdownloader";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "jdownloader.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = vars.general.domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:5800
@@ -22,12 +24,12 @@ in
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
     ++ (lib.optional (domainName == null) 5800);
 
-  virtualisation.oci-containers.containers.jdownloader = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "jlesage/jdownloader-2";
-    hostname = "jdownloader";
+    hostname = name;
     autoStart = true;
     volumes = [
-      "${vars.container.directory}/jdownloader:/config"
+      "${vars.container.directory}/${name}:/config"
       "${vars.container.directory}/downloads:/output"
     ];
     ports = [
