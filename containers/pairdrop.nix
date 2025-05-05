@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "pairdrop";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "pairdrop.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:3000
@@ -22,7 +24,7 @@ in
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
     ++ (lib.optional (domainName == null) 3000);
 
-  virtualisation.oci-containers.containers.pairdrop = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "lscr.io/linuxserver/pairdrop:latest";
     hostname = "pairdrop";
     autoStart = true;
