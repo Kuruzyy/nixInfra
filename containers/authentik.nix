@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "authentik";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -12,7 +14,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "authentik.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = vars.general.domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:9000
@@ -29,7 +31,7 @@ in
       image = "docker.io/library/postgres:16-alpine";
       hostname = "authentik-db";
       autoStart = true;
-      volumes = [ "${vars.container.directory}/authentik/db:/var/lib/postgresql/data" ];
+      volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
         POSTGRES_DB = "authentik";
         POSTGRES_USER = "authentik";
@@ -46,9 +48,9 @@ in
       hostname = "authentik-worker";
       autoStart = true;
       volumes = [
-        "${vars.container.directory}/authentik/media:/media"
-        "${vars.container.directory}/authentik/template:/templates"
-        "${vars.container.directory}/authentik/certs:/certs"
+        "${vars.container.directory}/${name}/media:/media"
+        "${vars.container.directory}/${name}/template:/templates"
+        "${vars.container.directory}/${name}/certs:/certs"
       ];
       environment = {
         AUTHENTIK_SECRET_KEY = ${secret_key};
@@ -68,8 +70,8 @@ in
       autoStart = true;
       dependsOn = [ "authentik-db" "authentik-redis" "authentik-worker"];
       volumes = [
-        "${vars.container.directory}/authentik/media:/media"
-        "${vars.container.directory}/authentik/template:/templates"
+        "${vars.container.directory}/${name}/media:/media"
+        "${vars.container.directory}/${name}/template:/templates"
       ];
       environment = {
         AUTHENTIK_SECRET_KEY = ${secret_key};
