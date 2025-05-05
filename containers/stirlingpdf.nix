@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "stirlingpdf";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "stirling-pdf.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:8118
@@ -27,11 +29,11 @@ in
     hostname = "stirling-pdf";
     autoStart = true;
     volumes = [
-      "${vars.container.directory}/stirlingpdf/trainingData:/usr/share/tessdata"
-      "${vars.container.directory}/stirlingpdf/extraConfigs:/configs"
-      "${vars.container.directory}/stirlingpdf/customFiles:/customFiles/"
-      "${vars.container.directory}/stirlingpdf/logs:/logs/"
-      "${vars.container.directory}/stirlingpdf/pipeline:/pipeline/"
+      "${vars.container.directory}/${name}/trainingData:/usr/share/tessdata"
+      "${vars.container.directory}/${name}/extraConfigs:/configs"
+      "${vars.container.directory}/${name}/customFiles:/customFiles/"
+      "${vars.container.directory}/${name}/logs:/logs/"
+      "${vars.container.directory}/${name}/pipeline:/pipeline/"
     ];
     environment = {
       DOCKER_ENABLE_SECURITY = false;
