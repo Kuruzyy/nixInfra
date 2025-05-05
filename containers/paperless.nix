@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "paperless";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -37,7 +39,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "paperless.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:8010
@@ -54,7 +56,7 @@ in
       image = "docker.io/library/postgres:17";
       hostname = "paperless-db";
       autoStart = true;
-      volumes = [ "${vars.container.directory}/paperless/db:/var/lib/postgresql/data" ];
+      volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
         POSTGRES_DB = "paperless";
         POSTGRES_USER = "paperless";
@@ -71,7 +73,7 @@ in
       hostname = "paperless";
       autoStart = true;
       dependsOn = [ "paperless-db" "paperless-redis" ];
-      volumes = [ "${vars.container.directory}/paperless/data:/usr/src/paperless" ];
+      volumes = [ "${vars.container.directory}/${name}/data:/usr/src/paperless" ];
       environment = 
         {
           PAPERLESS_DBHOST = "paperless-db";
