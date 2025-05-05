@@ -28,7 +28,7 @@ in
 
   virtualisation.oci-containers.containers.${name} = {
     image = "ghcr.io/koenkk/zigbee2mqtt";
-    hostname = "zigbee2mqtt";
+    hostname = name;
     autoStart = true;
     volumes = [
       "${vars.containers.directory}/${name}:/app/data"

@@ -29,7 +29,7 @@ in
   virtualisation.oci-containers.containers = {
     authentik-db = {
       image = "docker.io/library/postgres:16-alpine";
-      hostname = "authentik-db";
+      hostname = "${name}-db";
       autoStart = true;
       volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
@@ -40,12 +40,12 @@ in
     };
     authentik-redis = {
       image = "docker.io/library/redis:alpine";
-      hostname = "authentik-redis";
+      hostname = "${name}-redis";
       autoStart = true;
     };
     authentik-worker = {
       image = "ghcr.io/goauthentik/server:2025.4.0";
-      hostname = "authentik-worker";
+      hostname = "${name}-worker";
       autoStart = true;
       volumes = [
         "${vars.container.directory}/${name}/media:/media"
@@ -66,7 +66,7 @@ in
     };
     authentik-server = {
       image = "ghcr.io/goauthentik/server:2025.4.0";
-      hostname = "authentik-server";
+      hostname = "${name}-server";
       autoStart = true;
       dependsOn = [ "authentik-db" "authentik-redis" "authentik-worker"];
       volumes = [

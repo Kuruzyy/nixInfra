@@ -26,7 +26,7 @@ in
 
   virtualisation.oci-containers.containers.${name} = {
     image = "germannewsmaker/myspeed";
-    hostname = "myspeed";
+    hostname = name;
     autoStart = true;
     volumes = [
       "${vars.container.directory}/${name}:/myspeed/data"

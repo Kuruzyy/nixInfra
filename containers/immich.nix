@@ -27,7 +27,7 @@ in
   virtualisation.oci-containers.containers = {
     immich-db = {
       image = "tensorchord/pgvecto-rs:pg15-v0.4.0-rootless";
-      hostname = "immich-db";
+      hostname = "${name}-db";
       autoStart = true;
       volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
@@ -38,14 +38,14 @@ in
     };
     immich-redis = {
       image = "docker.io/library/redis:alpine";
-      hostname = "immich-redis";
+      hostname = "${name}-redis";
       autoStart = true;
     };
     immich = {
       image = "ghcr.io/imagegenius/immich:noml";
       hostname = name;
       autoStart = true;
-      dependsOn = [ "immich-db" "immich-redis" ];
+      dependsOn = [ "${name}-db" "${name}-redis" ];
       volumes = [
         "${vars.container.directory}/${name}/data:/config"
         "${vars.container.directory}/${name}/photos:/photos"
@@ -53,7 +53,7 @@ in
       environment = {
         DB_URL = "postgresql://immich:immich@immich-db:5432/immich";
         REDIS_HOSTNAME = "immich-redis";
-        IMMICH_TRUSTED_PROXIES = "https://immich.${vars.general.domainName}";
+        IMMICH_TRUSTED_PROXIES = "https://${name}.${vars.general.domainName}";
       };
       ports = [
         (portBinding 8080 8080)

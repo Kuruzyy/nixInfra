@@ -27,7 +27,7 @@ in
   virtualisation.oci-containers.containers = {
     nextcloud-db = {
       image = "postgres:alpine";
-      hostname = "nextcloud-db";
+      hostname = "${name}-db";
       autoStart = true;
       volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
@@ -38,14 +38,14 @@ in
     };
     nextcloud-redis = {
       image = "docker.io/library/redis:alpine";
-      hostname = "nextcloud-redis";
+      hostname = "${name}-redis";
       autoStart = true;
     };
     nextcloud = {
       image = "nextcloud:30.0.5-apache";
-      hostname = "nextcloud";
+      hostname = name;
       autoStart = true;
-      dependsOn = [ "nextcloud-db" "nextcloud-redis" ];
+      dependsOn = [ "${name}-db" "${name}-redis" ];
       volumes = [
         "${vars.container.directory}/${name}/data:/var/www/html"
       ];
@@ -55,7 +55,7 @@ in
         POSTGRES_USER = "nextcloud";
         POSTGRES_PASSWORD = "nextcloud";
         REDIS_HOST = "nextcloud-redis";
-        OVERWRITECLIURL = "https://nextcloud.${domainName}";
+        OVERWRITECLIURL = "https://${name}.${domainName}";
         OVERWRITEPROTOCOL = "https";
       };
       ports = [

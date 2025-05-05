@@ -26,7 +26,7 @@ in
 
   virtualisation.oci-containers.containers.${name} = {
     image = "lscr.io/linuxserver/pairdrop:latest";
-    hostname = "pairdrop";
+    hostname = name;
     autoStart = true;
     environment = {
       PUID = vars.general.PUID;

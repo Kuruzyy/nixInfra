@@ -26,7 +26,7 @@ in
 
   virtualisation.oci-containers.containers.${name} = {
     image = "iib0011/omni-tools:latest";
-    hostname = "omni-tools";
+    hostname = name;
     autoStart = true;
     ports = [
       (portBinding 8116 80)

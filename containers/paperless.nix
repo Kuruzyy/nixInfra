@@ -54,7 +54,7 @@ in
   virtualisation.oci-containers.containers = {
     paperless-db = {
       image = "docker.io/library/postgres:17";
-      hostname = "paperless-db";
+      hostname = "${name}-db";
       autoStart = true;
       volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
@@ -65,20 +65,20 @@ in
     };
     paperless-redis = {
       image = "docker.io/library/redis:alpine";
-      hostname = "paperless-redis";
+      hostname = "${name}-redis";
       autoStart = true;
     };
     paperless = {
       image = "ghcr.io/paperless-ngx/paperless-ngx:latest";
-      hostname = "paperless";
+      hostname = "${name}";
       autoStart = true;
-      dependsOn = [ "paperless-db" "paperless-redis" ];
+      dependsOn = [ "${name}-db" "${name}-redis" ];
       volumes = [ "${vars.container.directory}/${name}/data:/usr/src/paperless" ];
       environment = 
         {
           PAPERLESS_DBHOST = "paperless-db";
           PAPERLESS_REDIS = "redis://paperless-redis:6379";
-          PAPERLESS_URL = "paperless.${domainName}";
+          PAPERLESS_URL = "${name}.${domainName}";
         }
         // ssoEnvironment;
       ports = [

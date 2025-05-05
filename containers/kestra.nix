@@ -27,7 +27,7 @@ in
   virtualisation.oci-containers.containers = {
     kestra-db = {
       image = "postgres:alpine";
-      hostname = "kestra-db";
+      hostname = "${name}-db";
       autoStart = true;
       volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
@@ -38,9 +38,9 @@ in
     };
     kestra = {
       image = "kestra/kestra:latest";
-      hostname = "kestra";
+      hostname = "${name}";
       autoStart = true;
-      dependsOn = [ "kestra-db" ];
+      dependsOn = [ "${name}-db" ];
       volumes = [
         "${vars.container.directory}/${name}/data:/app/storage"
         "${vars.container.directory}/${name}/tmp:/tmp/kestra-wd"

@@ -24,7 +24,7 @@ in
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
     ++ (lib.optional (domainName == null) 8117);
 
-  virtualisation.oci-containers.containers.it-tools = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "corentinth/it-tools:latest";
     hostname = name;
     autoStart = true;

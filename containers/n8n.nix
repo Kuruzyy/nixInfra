@@ -27,7 +27,7 @@ in
   virtualisation.oci-containers.containers = {
     n8n-db = {
       image = "postgres:alpine";
-      hostname = "n8n-db";
+      hostname = "${name}-db";
       autoStart = true;
       volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
@@ -38,9 +38,9 @@ in
     };
     n8n = {
       image = "docker.n8n.io/n8nio/n8n";
-      hostname = "n8n";
+      hostname = "${name}";
       autoStart = true;
-      dependsOn = [ "n8n-db" ];
+      dependsOn = [ "${name}-db" ];
       volumes = [
         "${vars.container.directory}/${name}/data:/home/node/.n8n"
         "${vars.container.directory}/${name}/files:/files"   

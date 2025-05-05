@@ -24,9 +24,9 @@ in
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
     ++ (lib.optional (domainName == null) 8118);
 
-  virtualisation.oci-containers.containers.stirling-pdf = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "docker.stirlingpdf.com/stirlingtools/stirling-pdf:latest";
-    hostname = "stirling-pdf";
+    hostname = name;
     autoStart = true;
     volumes = [
       "${vars.container.directory}/${name}/trainingData:/usr/share/tessdata"

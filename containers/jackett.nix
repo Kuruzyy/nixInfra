@@ -26,7 +26,7 @@ in
 
   virtualisation.oci-containers.containers.${name} = {
     image = "lscr.io/linuxserver/jackett:latest";
-    hostname = "jackett";
+    hostname = name;
     autoStart = true;
     volumes = [
       "${vars.container.directory}/${name}:/config"
