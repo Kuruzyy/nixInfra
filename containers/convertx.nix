@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "convertx";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "convertx.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:8119
@@ -22,12 +24,12 @@ in
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
     ++ (lib.optional (domainName == null) 8119);
 
-  virtualisation.oci-containers.containers.convertx = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "ghcr.io/c4illin/convertx";
     hostname = "convertx";
     autoStart = true;
     volumes = [
-      "${vars.container.directory}/convertx:/app/data"
+      "${vars.container.directory}/${name}:/app/data"
     ];
     ports = [
       (portBinding 8119 3000)
