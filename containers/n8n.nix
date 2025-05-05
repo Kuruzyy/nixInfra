@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "n8n";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "n8n.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = vars.general.domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:5678
@@ -27,7 +29,7 @@ in
       image = "postgres:alpine";
       hostname = "n8n-db";
       autoStart = true;
-      volumes = [ "${vars.container.directory}/n8n/db:/var/lib/postgresql/data" ];
+      volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
         POSTGRES_DB = "n8n";
         POSTGRES_USER = "n8n";
@@ -40,8 +42,8 @@ in
       autoStart = true;
       dependsOn = [ "n8n-db" ];
       volumes = [
-        "${vars.container.directory}/n8n/data:/home/node/.n8n"
-        "${vars.container.directory}/n8n/files:/files"   
+        "${vars.container.directory}/${name}/data:/home/node/.n8n"
+        "${vars.container.directory}/${name}/files:/files"   
       ];
       environment = {
         DB_TYPE = "postgresdb";
