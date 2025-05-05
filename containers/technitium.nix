@@ -1,5 +1,7 @@
 { config, pkgs, vars, lib, ... }:
 let
+  name = "technitium";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "technitium.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:5380
@@ -28,12 +30,12 @@ in
       ++ [ 53 853 ];
   };
 
-  virtualisation.oci-containers.containers.technitium = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "technitium/dns-server:latest";
     hostname = "technitium";
     autoStart = true;
     volumes = [
-      "${vars.container.directory}/technitium:/etc/dns"
+      "${vars.container.directory}/${name}:/etc/dns"
     ];
     environment = {
       DNS_SERVER_DOMAIN = "technitium";
