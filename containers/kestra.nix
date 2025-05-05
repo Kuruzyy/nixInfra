@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "kestra";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "kestra.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = vars.general.domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:9090
@@ -27,7 +29,7 @@ in
       image = "postgres:alpine";
       hostname = "kestra-db";
       autoStart = true;
-      volumes = [ "${vars.container.directory}/kestra/db:/var/lib/postgresql/data" ];
+      volumes = [ "${vars.container.directory}/${name}/db:/var/lib/postgresql/data" ];
       environment = {
         POSTGRES_DB = "kestra";
         POSTGRES_USER = "kestra";
@@ -40,8 +42,8 @@ in
       autoStart = true;
       dependsOn = [ "kestra-db" ];
       volumes = [
-        "${vars.container.directory}/kestra/data:/app/storage"
-        "${vars.container.directory}/kestra/tmp:/tmp/kestra-wd"
+        "${vars.container.directory}/${name}/data:/app/storage"
+        "${vars.container.directory}/${name}/tmp:/tmp/kestra-wd"
       ];
       environment = {
         KESTRA_CONFIGURATION = ''
