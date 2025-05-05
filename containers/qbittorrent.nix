@@ -1,5 +1,7 @@
 { config, pkgs, vars, lib, ... }:
 let
+  name = "qbittorrent";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "qbittorrent.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:9001
@@ -22,12 +24,12 @@ in
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
     ++ (lib.optional (domainName == null) 9001);
 
-  virtualisation.oci-containers.containers.qbittorrent = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "lscr.io/linuxserver/qbittorrent:latest";
     hostname = "qbittorrent";
     autoStart = true;
     volumes = [
-      "${vars.container.directory}/qbittorrent:/config"
+      "${vars.container.directory}/${name}:/config"
       "${vars.container.directory}/downloads:/downloads"
     ];
     environment = {
