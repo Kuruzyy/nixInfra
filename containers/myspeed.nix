@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "myspeed";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "myspeed.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = vars.general.domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:5216
@@ -22,12 +24,12 @@ in
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
     ++ (lib.optional (domainName == null) 5216);
 
-  virtualisation.oci-containers.containers.myspeed = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "germannewsmaker/myspeed";
     hostname = "myspeed";
     autoStart = true;
     volumes = [
-      "${vars.container.directory}/myspeed:/myspeed/data"
+      "${vars.container.directory}/${name}:/myspeed/data"
     ];
     ports = [
       (portBinding 5216 5216)
