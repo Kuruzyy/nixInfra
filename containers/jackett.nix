@@ -24,7 +24,7 @@ in
     (config.networking.firewall.interfaces.${networkInterface}.allowedTCPPorts or []) 
     ++ (lib.optional (domainName == null) 9117);
 
-  virtualisation.oci-containers.containers.jackett = {
+  virtualisation.oci-containers.containers.${name} = {
     image = "lscr.io/linuxserver/jackett:latest";
     hostname = "jackett";
     autoStart = true;
