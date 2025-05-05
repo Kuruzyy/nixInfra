@@ -32,7 +32,7 @@ in
 
   virtualisation.oci-containers.containers.${name} = {
     image = "technitium/dns-server:latest";
-    hostname = "technitium";
+    hostname = name;
     autoStart = true;
     volumes = [
       "${vars.container.directory}/${name}:/etc/dns"
