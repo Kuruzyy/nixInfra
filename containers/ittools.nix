@@ -1,5 +1,7 @@
 { config, pkgs, vars, ... }:
 let
+  name = "ittools";
+
   domainName = vars.general.domainName;
   networkInterface = vars.general.networkInterface;
   portBinding = external: internal:
@@ -10,7 +12,7 @@ let
 in
 {
   services.caddy.virtualHosts = lib.mkIf (domainName != null) {
-    "it-tools.${domainName}" = {
+    "${name}.${domainName}" = {
       useACMEHost = domainName;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:8117
@@ -24,7 +26,7 @@ in
 
   virtualisation.oci-containers.containers.it-tools = {
     image = "corentinth/it-tools:latest";
-    hostname = "it-tools";
+    hostname = name;
     autoStart = true;
     ports = [
       (portBinding 8117 80)
